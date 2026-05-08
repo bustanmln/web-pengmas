@@ -6,8 +6,6 @@
 import { useState, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { SensorCard, SensorStatus } from './components/SensorCard';
-import { AnalyticsView } from './components/AnalyticsView';
-import { ReportsView } from './components/ReportsView';
 import { SettingsView } from './components/SettingsView';
 import { User, Clock, Wifi } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -73,29 +71,81 @@ export default function App() {
   const [sensors, setSensors] = useState(INITIAL_SENSORS);
   const [lastUpdate, setLastUpdate] = useState(new Date());
 
-  // Simulate live data updates
+  // Fetch data from Firebase
   useEffect(() => {
-    const interval = setInterval(() => {
-      setSensors(prev => prev.map(s => {
-        if (s.name === 'NOVA PM SDS011') {
-          return {
-            ...s,
-            values: [
-              { ...s.values[0], value: (parseFloat(s.values[0].value) + (Math.random() - 0.5)).toFixed(1) },
-              { ...s.values[1], value: (parseFloat(s.values[1].value) + (Math.random() - 0.5)).toFixed(1) }
-            ]
-          };
+    const fetchData = async () => {
+      try {
+        const response = await fetch('https://pengmas-sindangkerta04-f435a-default-rtdb.firebaseio.com/MonitoringStation.json');
+        const data = await response.json();
+        
+        if (data && data.Sensors) {
+          const s = data.Sensors;
+          
+          setSensors([
+            {
+              id: 'CH-01',
+              name: 'NOVA PM SDS011',
+              description: 'PM2.5/PM10 V2.18.4',
+              values: [
+                { label: 'PM 2.5', value: s.PM25 !== undefined ? String(s.PM25) : '0', unit: 'µg/m³' },
+                { label: 'PM 10', value: s.PM10 !== undefined ? String(s.PM10) : '0', unit: 'µg/m³' }
+              ],
+              status: (s.PM25 > 50 || s.PM10 > 100) ? 'elevated' : 'nominal',
+              icon: 'wind' as const
+            },
+            {
+              id: 'CH-02',
+              name: 'ME2-O3',
+              description: 'Deteksi Ozon',
+              values: [
+                { label: 'Ozon', value: s.Ozone !== undefined ? String(s.Ozone) : '0', unit: 'ppm' }
+              ],
+              status: s.Ozone > 0.1 ? 'elevated' : 'nominal',
+              icon: 'gas' as const
+            },
+            {
+              id: 'CH-03',
+              name: 'MQ-136',
+              description: 'Hidrogen Sulfida (H2S)',
+              values: [
+                { label: 'H2S', value: s.H2S !== undefined ? String(s.H2S) : '0', unit: 'ppm' }
+              ],
+              status: s.H2S > 0.05 ? 'elevated' : 'nominal',
+              icon: 'chemical' as const
+            },
+            {
+              id: 'CH-04',
+              name: 'MQ-7',
+              description: 'Karbon Monoksida (CO)',
+              values: [
+                { label: 'CO', value: s.CO !== undefined ? String(s.CO) : '0', unit: 'ppm' }
+              ],
+              status: s.CO > 35 ? 'elevated' : 'nominal',
+              range: 'Rentang: 20-2000ppm',
+              icon: 'gas' as const
+            },
+            {
+              id: 'CH-05',
+              name: 'FERMION NO2',
+              description: 'MEMS Nitrogen Dioksida',
+              values: [
+                { label: 'NO2', value: s.NO2 !== undefined ? String(s.NO2) : '0', unit: 'ppm' }
+              ],
+              status: s.NO2 > 0.5 ? 'elevated' : 'nominal',
+              range: 'Rentang: 0.1-10ppm',
+              icon: 'atom' as const
+            }
+          ]);
+          setLastUpdate(new Date());
         }
-        return {
-          ...s,
-          values: s.values.map(v => ({
-            ...v,
-            value: (parseFloat(v.value) + (Math.random() * 0.01 - 0.005)).toFixed(2)
-          }))
-        };
-      }));
-      setLastUpdate(new Date());
-    }, 3000);
+      } catch (error) {
+        console.error("Error fetching Firebase data:", error);
+      }
+    };
+
+    fetchData(); // Initial fetch
+    const interval = setInterval(fetchData, 1000); // Poll every 1 second
+
     return () => clearInterval(interval);
   }, []);
 
@@ -109,14 +159,10 @@ export default function App() {
           <div className="space-y-1">
              <h2 className="text-2xl font-semibold tracking-tight">
                {activeTab === 'dashboard' && 'Selamat Datang, Admin'}
-               {activeTab === 'analytics' && 'Analisis Metrik Aero'}
-               {activeTab === 'reports' && 'Laporan Sistem'}
                {activeTab === 'settings' && 'Pengaturan Platform'}
              </h2>
              <p className="text-sm text-text-dim">
                {activeTab === 'dashboard' && 'Pantau performa sistem Anda hari ini.'}
-               {activeTab === 'analytics' && 'Analisis mendalam data telemetri historis.'}
-               {activeTab === 'reports' && 'Tinjau dan ekspor log sensor historis.'}
                {activeTab === 'settings' && 'Konfigurasi parameter operasional dan batas keamanan.'}
              </p>
           </div>
@@ -173,8 +219,6 @@ export default function App() {
               </>
             )}
 
-            {activeTab === 'analytics' && <AnalyticsView />}
-            {activeTab === 'reports' && <ReportsView />}
             {activeTab === 'settings' && <SettingsView />}
           </motion.div>
         </AnimatePresence>

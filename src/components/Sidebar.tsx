@@ -1,10 +1,8 @@
-import { LayoutDashboard, BarChart2, FileText, Settings, Radio } from 'lucide-react';
+import { LayoutDashboard, Settings, Radio } from 'lucide-react';
 import { motion } from 'motion/react';
 
 const menuItems = [
   { id: 'dashboard', label: 'DASHBOARD', icon: LayoutDashboard },
-  { id: 'analytics', label: 'ANALITIK', icon: BarChart2 },
-  { id: 'reports', label: 'LAPORAN', icon: FileText },
   { id: 'settings', label: 'PENGATURAN', icon: Settings },
 ];
 

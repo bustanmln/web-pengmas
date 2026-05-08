@@ -1,0 +1,52 @@
+:root {
+  --bg-dark: #0f172a;
+  --sidebar-bg: #1e293b;
+  --card-bg: #1e293b;
+  --accent-cyan: #22d3ee;
+  --accent-red: #fb7185;
+  --text-main: #f8fafc;
+  --text-sub: #94a3b8;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-dark);
+  font-family: 'Inter', sans-serif;
+  color: var(--text-main);
+  display: flex;
+}
+
+/* Sidebar Styling */
+.sidebar {
+  width: 240px;
+  background-color: var(--sidebar-bg);
+  height: 100vh;
+  padding: 20px;
+  border-right: 1px solid #334155;
+}
+
+/* Grid Dashboard */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+/* Sensor Card Styling */
+.sensor-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #334155;
+}
+
+.sensor-card.elevated {
+  border-left: 4px solid var(--accent-red);
+}
+
+.sensor-card.nominal {
+  border-left: 4px solid var(--accent-cyan);
+}
